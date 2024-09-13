@@ -3,7 +3,7 @@
 #include <ostream>
 #include <thread>
 
-#include "src/threadpool.hpp"
+#include "include/threadpool.hpp"
 
 int print(int i) {
   std::cout << i;
