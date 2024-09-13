@@ -20,7 +20,7 @@ class ThreadPool {
  public:
   ThreadPool(std::size_t);
   template <typename Func, typename... Args>
-  auto enqueue(Func&& func, Args&&... args);
+  auto add_task(Func&& func, Args&&... args);
   ~ThreadPool();
 
  private:
@@ -55,7 +55,7 @@ inline ThreadPool::ThreadPool(size_t size) : stop_(false) {
 }
 
 template <typename Func, typename... Args>
-auto ThreadPool::enqueue(Func&& func, Args&&... args) {
+auto ThreadPool::add_task(Func&& func, Args&&... args) {
   using return_type = decltype(func(args...));
   auto task = std::make_shared<std::packaged_task<return_type()>>(
       std::bind(std::forward<Func>(func), std::forward<Args>(args)...));
