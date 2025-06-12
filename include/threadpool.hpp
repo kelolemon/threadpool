@@ -31,6 +31,14 @@ class ThreadPool {
   bool stop_;
 };
 
+inline ThreadPool::~ThreadPool() {
+  this->stop_ = true;
+  this->cv_.notify_all();
+  for (auto& thread : this->thread_) {
+    thread.join();
+  }
+}
+
 inline ThreadPool::ThreadPool(size_t size) : stop_(false) {
   for (size_t i = 0; i < size; i++) {
     this->thread_.emplace_back([this] {
@@ -38,10 +46,9 @@ inline ThreadPool::ThreadPool(size_t size) : stop_(false) {
         std::function<void()> task;
         {
           std::unique_lock<std::mutex> lock_guard_(this->mutex_);
-          this->cv_.wait(
-              lock_guard_, [this]() -> auto{
-                return this->stop_ || !this->task_queue_.empty();
-              });
+          this->cv_.wait(lock_guard_, [this]() -> auto {
+            return this->stop_ || !this->task_queue_.empty();
+          });
           if (this->stop_ && this->task_queue_.empty()) {
             return;
           }
